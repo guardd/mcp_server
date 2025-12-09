@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+# Orcho Risk Assessment (Manual)
+
+Use this rule when you want to manually assess risk for specific prompts.
+
+## Usage
+
+Mention this rule with `@orcho-risk-assessment-manual` to assess a prompt's risk level.
+
+## What it does
+
+Calls the `@orcho assess_risk` tool with context about:
+- Currently open file
+- Files that will be modified
+- Risk level and score
+
+Use this for prompts you want to verify before proceeding.

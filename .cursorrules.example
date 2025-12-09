@@ -1,0 +1,27 @@
+# Orcho Risk Assessment - Cursor Rules
+
+## Automatic Risk Assessment
+
+Before processing ANY user prompt or request, you MUST:
+
+1. **Always call the Orcho risk assessment tool first:**
+   - Use: `@orcho assess_risk` with the user's prompt
+   - **CRITICAL**: You MUST automatically include:
+     - `current_file`: The path of the currently open file in the editor
+     - `other_files`: An array of file paths that will be modified by the prompt (analyze the prompt to determine this)
+   
+2. **Based on the risk level:**
+   - **HIGH risk (level: "high" or score ≥ 70):**
+     - Display a clear warning to the user
+     - Show the risk score and details
+     - Ask for explicit confirmation before proceeding
+     - Consider if the request should be modified or blocked
+   
+   - **LOW risk (level: "low" or score < 70):**
+     - Proceed normally
+     - Optionally mention the risk assessment passed
+
+3. **Always include risk assessment in your response:**
+   - Show the risk level and score
+   - This helps users understand the safety of their prompts
+

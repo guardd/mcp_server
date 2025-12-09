@@ -1,0 +1,40 @@
+{
+  "name": "@orcho_risk/mcp-server",
+  "version": "1.0.3",
+  "description": "Orcho Risk Assessment MCP Server for Cursor - Analyze coding prompts for security and safety risks",
+  "main": "mcp-server.js",
+  "bin": {
+    "orcho-mcp": "./mcp-server.js"
+  },
+  "files": [
+    "mcp-server.js",
+    "README.md",
+    "SETUP.md",
+    ".cursorrules.example",
+    ".cursor/rules/*.mdc"
+  ],
+  "scripts": {
+    "start": "node mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "orcho",
+    "cursor",
+    "risk-assessment",
+    "security",
+    "ai-safety",
+    "prompt-analysis"
+  ],
+  "author": "Orcho",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orcho/mcp-server.git"
+  }
+}

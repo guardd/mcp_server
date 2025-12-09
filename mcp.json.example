@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "orcho": {
+      "command": "npx",
+      "args": ["-y", "@orcho_risk/mcp-server"],
+      "env": {
+        "ORCHO_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
