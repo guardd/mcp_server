@@ -205,7 +205,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: 'object',
           properties: {
-            task: {
+            prompt: {
               type: 'string',
               description: 'The coding task or prompt you want to assess for risk.',
             },
@@ -229,7 +229,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: 'Optional repository full name (owner/repo). If not provided, will be automatically detected from git remote.',
             },
           },
-          required: ['task'],
+          required: ['prompt'],
         },
       },
     ],
@@ -241,7 +241,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === 'assess_risk') {
-    const task = args.task;
+    const prompt = args.prompt;
     
     // Build context object if context parameters are provided
     const context = {};
@@ -265,11 +265,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
     
     // Assess risk level (with or without context)
-    const riskAssessment = await checkRiskLevel(task, Object.keys(context).length > 0 ? context : null);
+    const riskAssessment = await checkRiskLevel(prompt, Object.keys(context).length > 0 ? context : null);
     
     // Format response
     let response = `🔍 **Orcho - Risk Assessment**\n\n`;
-    response += `**Your Prompt:**\n${task}\n\n`;
+    response += `**Your Prompt:**\n${prompt}\n\n`;
     
     // Show context if used
     if (context.current_file) {
