@@ -11,12 +11,60 @@ const {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } = require('@modelcontextprotocol/sdk/types.js');
+const { execSync } = require('child_process');
 
 // Configuration
 const ORCHO_API_KEY = process.env.ORCHO_API_KEY || 'test_key_orcho_12345';
 const ORCHO_API_URL = 'https://app.orcho.ai/risk/api/v1/generate-risk';
 const ORCHO_API_URL_WITH_CONTEXT = 'https://app.orcho.ai/risk/api/v1/generate-risk-with-context';
 const DEBUG_MODE = process.env.ORCHO_DEBUG === 'true' || process.env.ORCHO_DEBUG === '1';
+
+/**
+ * Get repository full name (owner/repo) from git remote
+ * @returns {string|null} Repository name or null if not found
+ */
+function getRepoFullName() {
+  try {
+    // Try git remote get-url origin first
+    let url;
+    try {
+      url = execSync('git remote get-url origin', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    } catch (e) {
+      // Fallback to git config
+      try {
+        url = execSync('git config --get remote.origin.url', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+      } catch (e2) {
+        return null;
+      }
+    }
+    
+    if (!url) return null;
+    
+    // Parse the URL to extract owner/repo
+    let path;
+    if (url.includes('://')) {
+      // HTTPS URL: https://github.com/owner/repo.git
+      path = new URL(url).pathname;
+    } else if (url.includes('@') && url.includes(':')) {
+      // SSH URL: git@github.com:owner/repo.git
+      path = url.split(':')[1];
+    } else {
+      path = url;
+    }
+    
+    // Remove leading/trailing slashes and .git extension
+    path = path.replace(/^\/+|\/+$/g, '').replace(/\.git$/, '');
+    const parts = path.split('/').filter(p => p);
+    
+    // Return last two parts (owner/repo) or the path itself
+    if (parts.length >= 2) {
+      return parts.slice(-2).join('/');
+    }
+    return path || null;
+  } catch (error) {
+    return null;
+  }
+}
 
 /**
  * Check risk level by calling Orcho API
@@ -42,19 +90,20 @@ async function checkRiskLevel(prompt, context = null) {
     // Build request body
     let requestBody;
     if (useContextEndpoint) {
+      // API expects: { prompt, context: { repo_full_name, current_file, other_files? }, weights? }
       requestBody = {
         prompt: prompt,
         context: {
+          repo_full_name: context.repo_full_name,  // REQUIRED
           current_file: context.current_file,
-          ...(context.dependency_graph && { dependency_graph: context.dependency_graph }),
-          ...(context.other_files && { other_files: context.other_files }),
-          ...(context.weights && { weights: context.weights }),
-          ...(context.aiignore_file && { aiignore_file: context.aiignore_file }),
-        }
+          ...(context.other_files && context.other_files.length > 0 && { other_files: context.other_files })
+        },
+        ...(context.weights && { weights: context.weights })  // weights at top level, not in context
       };
     } else {
       requestBody = {
-        prompt: prompt
+        prompt: prompt,
+        ...(context && context.weights && { weights: context.weights })
       };
   }
   
@@ -171,17 +220,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               },
               description: 'STRONGLY RECOMMENDED: Array of file paths that will be touched/modified by this prompt. Analyze the user prompt to determine which files will be affected (e.g., if prompt says "update login.js and auth.js", include ["login.js", "auth.js"]). If no other files will be touched, pass an empty array []. This enables accurate blast radius calculation. Always try to include this based on prompt analysis.',
             },
-            dependency_graph: {
-              type: 'object',
-              description: 'Optional JSON dependency graph of the project. Can be generated from package.json, requirements.txt, etc.',
-            },
             weights: {
               type: 'object',
               description: 'Optional custom weights for risk calculation factors.',
             },
-            aiignore_file: {
+            repo_full_name: {
               type: 'string',
-              description: 'Optional path to .aiignore file for excluding files from analysis.',
+              description: 'Optional repository full name (owner/repo). If not provided, will be automatically detected from git remote.',
             },
           },
           required: ['task'],
@@ -206,14 +251,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (args.other_files && Array.isArray(args.other_files) && args.other_files.length > 0) {
       context.other_files = args.other_files;
     }
-    if (args.dependency_graph) {
-      context.dependency_graph = args.dependency_graph;
-    }
     if (args.weights) {
       context.weights = args.weights;
     }
-    if (args.aiignore_file) {
-      context.aiignore_file = args.aiignore_file;
+    
+    // Get repo_full_name if context is being used (REQUIRED by API)
+    if (args.current_file) {
+      context.repo_full_name = args.repo_full_name || getRepoFullName();
+      // If repo_full_name is still null/empty, log warning but continue
+      if (!context.repo_full_name) {
+        console.error('Warning: repo_full_name not found and not provided. API call may fail.');
+      }
     }
     
     // Assess risk level (with or without context)

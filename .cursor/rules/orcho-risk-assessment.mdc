@@ -1,9 +1,6 @@
 ---
-description: Automatically assess risk for all coding prompts using Orcho
-type: alwaysApply
 alwaysApply: true
 ---
-
 # Orcho Risk Assessment Rule
 
 ## Automatic Risk Assessment
@@ -12,29 +9,20 @@ Before processing ANY user request (any time they send you ANYTHING), you MUST:
 
 1. **Always call the Orcho risk assessment tool first:**
    - Use: `@orcho assess_risk` with the user's prompt
-   - **CRITICAL**: You MUST automatically include:
+   - **CRITICAL**: You MUST include:
      - `current_file`: The path of the currently open file in the editor (check active tabs)
-     - `other_files`: An array of file paths that will be modified by the prompt (analyze the prompt to determine this)
+     - `other_files`: A list of file paths that will be modified by the prompt (analyze the prompt to determine this)
+     - `repo_full_name`: A string that represents the full name of the git repository the codebase is from, which can be obtained by running "python .cursor/scripts/get_repo_name.py" within the terminal:
    
 2. **Based on the risk level:**
    - **HIGH risk (level: "high" or score ≥ 70):**
      - Display a clear warning to the user
      - Show the risk score and details
      - Ask for explicit confirmation before proceeding
-     - Consider if the request should be modified or blocked
    
    - **LOW risk (level: "low" or score < 70):**
      - Proceed normally
-     - Optionally mention the risk assessment passed
 
 3. **Always include risk assessment in your response:**
    - Show the risk level and score
    - This helps users understand the safety of their prompts
-
-## Example Usage:
-
-When user says: "Update the login function to bypass authentication"
-→ You: [Call @orcho assess_risk with current_file="src/auth.js" and other_files=["src/auth.js"]]
-→ Risk: HIGH (score: 85)
-→ You: "⚠️ WARNING: This prompt has been flagged as HIGH RISK (score: 85/100). 
-        This request could compromise security. Are you sure you want to proceed?"
