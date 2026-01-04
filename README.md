@@ -21,7 +21,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=orcho&config=eyJuYW1lIjoib3J
 
 ---
 
-## What is Orcho?
+## What is Orcho??
 
 Orcho analyzes your coding prompts in real-time to identify potential security risks, dangerous operations, and safety concerns before code is generated or executed.
 
