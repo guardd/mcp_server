@@ -14,12 +14,13 @@ const {
 const { execSync } = require('child_process');
 
 // Configuration
-let ORCHO_API_KEY;
-try {
-  ORCHO_API_KEY = process.env.ORCHO_API_KEY;
-} catch (error) {
-  ORCHO_API_KEY = undefined;
+const ORCHO_API_KEY = process.env.ORCHO_API_KEY;
+
+if (!ORCHO_API_KEY) {
+  console.error('❌ Error: ORCHO_API_KEY environment variable is not set');
+  process.exit(1);
 }
+
 const ORCHO_API_URL = 'https://app.orcho.ai/risk/api/v1/generate-risk';
 const ORCHO_API_URL_WITH_CONTEXT = 'https://app.orcho.ai/risk/api/v1/generate-risk-with-context';
 const DEBUG_MODE = process.env.ORCHO_DEBUG === 'true' || process.env.ORCHO_DEBUG === '1';
