@@ -21,8 +21,19 @@ if (!ORCHO_API_KEY) {
   process.exit(1);
 }
 
-const ORCHO_API_URL = 'https://app.orcho.ai/risk/api/v1/generate-risk';
-const ORCHO_API_URL_WITH_CONTEXT = 'https://app.orcho.ai/risk/api/v1/generate-risk-with-context';
+const ORCHO_ENV = (process.env.ORCHO_ENV || 'prod').toLowerCase();
+const ORCHO_API_BASE =
+  process.env.ORCHO_API_BASE ||
+  (ORCHO_ENV === 'dev' ? 'https://dev.orcho.ai' : 'https://app.orcho.ai');
+
+const ORCHO_API_URL =
+  process.env.ORCHO_API_URL ||
+  `${ORCHO_API_BASE}/risk/api/v1/generate-risk`;
+
+const ORCHO_API_URL_WITH_CONTEXT =
+  process.env.ORCHO_API_URL_WITH_CONTEXT ||
+  `${ORCHO_API_BASE}/risk/api/v1/generate-risk-with-context`;
+
 const DEBUG_MODE = process.env.ORCHO_DEBUG === 'true' || process.env.ORCHO_DEBUG === '1';
 
 /**
@@ -319,6 +330,8 @@ async function main() {
   console.error('✅ Orcho MCP Server started (Risk Assessment Mode)');
   console.error(`   API URL: ${ORCHO_API_URL}`);
   console.error(`   API Key: ${ORCHO_API_KEY.substring(0, 10)}...`);
+  console.error(`   Env: ${ORCHO_ENV}`);
+  console.error(`   API Base: ${ORCHO_API_BASE}`);
 }
 
 main().catch((error) => {
