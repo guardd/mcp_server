@@ -5,13 +5,13 @@
  * Risk assessment API for Cursor prompts
  */
 
-const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
-const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
-const {
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} = require('@modelcontextprotocol/sdk/types.js');
-const { execSync } = require('child_process');
+} from '@modelcontextprotocol/sdk/types.js';
+import { execSync } from 'child_process';
 
 // Configuration
 const ORCHO_API_KEY = process.env.ORCHO_API_KEY;
