@@ -1,6 +1,7 @@
 {
   "name": "@orcho_risk/mcp-server",
   "version": "1.0.8-dev.0",
+  "type": "module",
   "description": "Orcho Risk Assessment MCP Server for Cursor - Analyze coding prompts for security and safety risks",
   "main": "mcp-server.js",
   "bin": {
